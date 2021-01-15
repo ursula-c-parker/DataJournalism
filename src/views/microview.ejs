@@ -1,0 +1,106 @@
+<!doctype html>
+
+<%- include('global/header'); %>
+<%- include('global/navbar'); %>
+
+<a class="waves-effect waves-light btn" onclick="goBackwards()" id="backward"><</a>
+<a class="waves-effect waves-light btn" onclick="goForwards()" id="forward">></a>
+
+<h1><%= data.country %></h1>
+<h3>2018 Life Expectancy in <%= data.country %>: <%= parseFloat(data["2018"]).toFixed(3) %></h2>
+<br />
+<h4>2018 International avarage life expectancy: 72.748</h2>
+<h4>The life expectancy in <%= data.country %> is approximately <%= parseFloat(data[2018]/72.748).toFixed(3)%>% of the international average.</h3>
+<br />
+<h4>The life expectancy has gone up by <%= parseFloat(data["2018"] -  data["1961"]).toFixed(3) %> years from 1960 to 2018.</h3>
+<div id="my_dataviz"></div>
+
+<!-- Load d3.js -->
+<script src="https://d3js.org/d3.v4.js"></script>
+
+<script>
+
+var countries = <%-JSON.stringify(countries)%>
+//var countries = JSON.parse(stringed)
+var indexData = '<%= index %>';
+var index = parseInt(indexData, 10)
+
+function goForwards() {
+  if (index <= 176) {
+    let country = countries[index+1].country;
+    let url = "../build/" + country.split(" ").join("_") + ".html"
+    window.location.href = url;
+    console.log(index)
+  }else if (index == 176){
+    document.getElementById("forward").disabled = true
+  }
+}
+
+function goBackwards() {
+  if (index >= 2) {
+    let country = countries[index-1].country;
+    let url = "../build/" + country.split(" ").join("_") + ".html"
+    window.location.href = url;
+    console.log(index)
+  }else if (index == 2){
+    document.getElementById("backward").disabled = true
+  }
+}
+
+var getData = '<%= data.country %>';
+// set the dimensions and margins of the graph
+var margin = {top: 10, right: 30, bottom: 30, left: 60},
+    width = 460 - margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;
+
+// append the svg object to the body of the page
+var svg = d3.select("#my_dataviz")
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+//Read the data
+d3.csv("https://raw.githubusercontent.com/ursula-c-parker/DataJournalism/master/data/totalLifeExpectancyLong.csv",
+
+  // When reading the csv, I must format variables:
+  function(d){
+    return { date : d3.timeParse("%Y")(d.Date), value : d[getData] }
+  },
+
+  // Now I can use this dataset:
+  function(data) {
+
+    // Add X axis --> it is a date format
+    var x = d3.scaleTime()
+      .domain(d3.extent(data, function(d) { return d.date; }))
+      .range([ 0, width ]);
+    svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+
+    // Add Y axis
+    var y = d3.scaleLinear()
+      .domain([d3.min(data, function(d) { return +d.value; }), d3.max(data, function(d) { return +d.value; })])
+      .range([ height, 0 ]);
+    svg.append("g")
+      .call(d3.axisLeft(y));
+
+    // Add the line
+    svg.append("path")
+      .datum(data)
+      .attr("fill", "none")
+      .attr("stroke", "steelblue")
+      .attr("stroke-width", 1.5)
+      .attr("d", d3.line()
+        .x(function(d) { return x(d.date) })
+        .y(function(d) { return y(d.value) })
+        )
+
+})
+
+</script>
+
+<%- include('global/footer'); %>

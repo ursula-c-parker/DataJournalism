@@ -1,4 +1,0 @@
-# DataJournalism
-hi
-
-whats up

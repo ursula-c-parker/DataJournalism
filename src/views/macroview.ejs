@@ -20,6 +20,7 @@
       <div class="col s7">
         <svg id="lifeExpectancy" width="800" height="600"></svg>
         <img src="../build/images/slider.jpg" width="800" height="50"/>
+        <figcaption>Life expectancy (years)<figcaption>
       </div>
 
       <div class="col s5">
@@ -181,7 +182,6 @@ function ready(error, topo) {
 
       selectedYearLE = (d3.timeFormat('%Y')(val))
       drawMap(selectedButtonLE, selectedYearLE)
-
     });
 
   var gTimeLE = d3
